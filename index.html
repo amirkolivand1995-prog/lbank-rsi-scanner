@@ -1,0 +1,142 @@
+<!doctype html>
+<html lang="fa" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#111827">
+<title>LBank RSI 20 Scanner</title>
+<style>
+*{box-sizing:border-box}body{margin:0;background:#0b1020;color:#eef2ff;font-family:system-ui,-apple-system,Segoe UI,Roboto,sans-serif}
+.wrap{max-width:720px;margin:auto;padding:16px}.card{background:#121a2d;border:1px solid #26324d;border-radius:18px;padding:16px;margin-bottom:12px}
+h1{font-size:21px;margin:0 0 8px}.muted{color:#9aa7c1;font-size:13px}.status{display:flex;gap:8px;align-items:center;margin:12px 0}.dot{width:10px;height:10px;border-radius:50%;background:#64748b}.dot.on{background:#22c55e}.btn{border:0;border-radius:12px;padding:12px 14px;background:#2563eb;color:white;font-weight:700;font-size:14px;margin:4px;cursor:pointer}.btn.secondary{background:#26324d}.btn.warn{background:#b45309}.grid{display:grid;grid-template-columns:1fr 1fr;gap:8px}.row{display:flex;justify-content:space-between;align-items:center;padding:11px 12px;background:#0f172a;border-radius:12px}.sym{font-weight:700;font-size:14px}.rsi{font-variant-numeric:tabular-nums;font-weight:800}.hotup{color:#fb7185}.hotdn{color:#4ade80}.normal{color:#cbd5e1}.err{color:#fca5a5}.small{font-size:12px}.log{max-height:160px;overflow:auto;white-space:pre-wrap;background:#080c17;border-radius:12px;padding:10px;font-size:11px;color:#a5b4fc}.notice{background:#172554;border:1px solid #1d4ed8;padding:12px;border-radius:12px;font-size:13px;line-height:1.7}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="card">
+    <h1>📊 اسکنر RSI برای LBank Futures</h1>
+    <div class="muted">RSI 20 • تایم‌فریم 15 دقیقه • بالای 70 / پایین 30 • بدون API Key</div>
+    <div class="status"><span id="dot" class="dot"></span><b id="status">در حال آماده‌سازی...</b></div>
+    <button class="btn" id="start">▶ شروع اسکن</button>
+    <button class="btn secondary" id="notify">🔔 فعال‌کردن اعلان</button>
+  </div>
+
+  <div class="card">
+    <div class="notice">
+      این نسخه فقط داده عمومی بازار را می‌خواند و هیچ دسترسی به حساب یا معاملات شما ندارد.
+      برای اعلان گوشی، اجازه Notifications را فعال کنید.
+    </div>
+  </div>
+
+  <div class="card">
+    <h3 style="margin-top:0">وضعیت ۲۸ نماد</h3>
+    <div id="grid" class="grid"></div>
+  </div>
+
+  <div class="card">
+    <b>گزارش اتصال</b>
+    <div id="log" class="log"></div>
+  </div>
+</div>
+<script>
+const SYMBOLS = [
+"XCUUSDT","XBRUSDT","GOLDUSDT","SILVERUSDT","BTCUSDT","ETHUSDT","FILUSDT",
+"SOLUSDT","ICPUSDT","XRPUSDT","DOGEUSDT","SHIBUSDT","DYDXUSDT","HBARUSDT",
+"NOTUSDT","APTUSDT","ENAUSDT","AEROUSDT","CHZUSDT","GALAUSDT","SNXUSDT",
+"TRXUSDT","POPCATUSDT","PEPEUSDT","LINKUSDT","UNIUSDT","ADAUSDT","AVAXUSDT"
+];
+const RSI_LEN=20, UP=70, DOWN=30, TF="15min";
+const state=Object.fromEntries(SYMBOLS.map(s=>[s,{rsi:null,prev:null,lastBar:null,history:[]}]));
+let ws=null, running=false, reconnectTimer=null;
+const $=id=>document.getElementById(id);
+function log(x){$("log").textContent=new Date().toLocaleTimeString()+"  "+x+"\n"+$("log").textContent.slice(0,5000)}
+function setStatus(t,on=false){$("status").textContent=t;$("dot").classList.toggle("on",on)}
+function render(){
+  $("grid").innerHTML=SYMBOLS.map(s=>{
+    const x=state[s], r=x.rsi;
+    let cls="normal",txt=r==null?"—":r.toFixed(2);
+    if(r!=null&&r>70) cls="hotup"; else if(r!=null&&r<30) cls="hotdn";
+    return `<div class="row"><span class="sym">${s}.P</span><span class="rsi ${cls}">${txt}</span></div>`;
+  }).join("");
+}
+function rsi(vals){
+  if(vals.length<RSI_LEN+1) return null;
+  let gains=0,losses=0;
+  for(let i=1;i<=RSI_LEN;i++){const d=vals[i]-vals[i-1];if(d>=0)gains+=d;else losses-=d}
+  let ag=gains/RSI_LEN, al=losses/RSI_LEN;
+  for(let i=RSI_LEN+1;i<vals.length;i++){
+    const d=vals[i]-vals[i-1],g=Math.max(d,0),l=Math.max(-d,0);
+    ag=(ag*(RSI_LEN-1)+g)/RSI_LEN; al=(al*(RSI_LEN-1)+l)/RSI_LEN;
+  }
+  if(al===0) return 100;
+  return 100-(100/(1+ag/al));
+}
+function notifyUser(msg){
+  if("Notification" in window && Notification.permission==="granted") new Notification("LBank RSI Alert",{body:msg});
+}
+function processBar(symbol, bar, confirmed=true){
+  const x=state[symbol], close=Number(bar.c);
+  if(!Number.isFinite(close)) return;
+  const t=String(bar.t);
+  const oldBar=x.lastBar;
+  if(oldBar===t){ x.history[x.history.length-1]=close; }
+  else { x.lastBar=t; x.history.push(close); if(x.history.length>300)x.history.shift(); }
+  const old=x.rsi; const now=rsi(x.history); x.prev=old; x.rsi=now;
+  if(confirmed && old!=null && now!=null){
+    if(old<=70 && now>70){const m=`🔴 ${symbol}.P | RSI 20 = ${now.toFixed(2)} > 70`; notifyUser(m); log(m)}
+    if(old>=30 && now<30){const m=`🟢 ${symbol}.P | RSI 20 = ${now.toFixed(2)} < 30`; notifyUser(m); log(m)}
+  }
+  render();
+}
+function connect(){
+  if(ws){try{ws.close()}catch(e){}}
+  setStatus("در حال اتصال به LBank Futures...",false);
+  ws=new WebSocket("wss://lbkperpws.lbank.com/ws");
+  ws.onopen=()=>{
+    setStatus("متصل — در حال دریافت ۱۵ دقیقه‌ای",true);log("WebSocket متصل شد.");
+    // First request history so RSI 20 is available immediately.
+    SYMBOLS.forEach(s=>{
+      ws.send(JSON.stringify({action:"request",request:"kbar",kbar:"15min",pair:s,size:"100"}));
+    });
+    // Then subscribe to live 15m candles.
+    SYMBOLS.forEach(s=>{
+      ws.send(JSON.stringify({action:"subscribe",subscribe:"kbar",kbar:"15min",pair:s}));
+    });
+    log("تاریخچه ۱۵ دقیقه‌ای + اشتراک زنده برای ۲۸ نماد ارسال شد.");
+  };
+  ws.onmessage=e=>{
+    let d; try{d=JSON.parse(e.data)}catch{return}
+    if(d.action==="ping"){ws.send(JSON.stringify({action:"pong",pong:d.ping}));return}
+    if(d.type==="kbar" && d.pair && d.kbar){
+      const s=d.pair.toUpperCase(); if(state[s]) processBar(s,d.kbar,true);
+    }
+    // Historical request responses can vary by LBank gateway version.
+    if((d.type==="kbar" || d.type==="kbars" || d.request==="kbar") && d.pair){
+      const s=d.pair.toUpperCase();
+      const arr = Array.isArray(d.data) ? d.data : (Array.isArray(d.kbars) ? d.kbars : null);
+      if(state[s] && arr && arr.length){
+        state[s].history=[];
+        state[s].lastBar=null;
+        for(const b of arr){
+          const bar = Array.isArray(b) ? {t:b[0],o:b[1],h:b[2],l:b[3],c:b[4],v:b[5]} : b;
+          processBar(s,bar,false);
+        }
+      }
+    }
+  };
+  ws.onerror=()=>{setStatus("خطا در اتصال",false);log("خطای WebSocket")}
+  ws.onclose=()=>{if(running){setStatus("اتصال قطع شد؛ تلاش مجدد...",false);clearTimeout(reconnectTimer);reconnectTimer=setTimeout(connect,4000)}}
+}
+$("start").onclick=()=>{
+  running=!running;
+  if(running){$("start").textContent="⏸ توقف اسکن";connect()}else{if(ws)ws.close();setStatus("متوقف",false);$("start").textContent="▶ شروع اسکن"}
+};
+$("notify").onclick=async()=>{
+  if(!("Notification" in window)){alert("این مرورگر اعلان را پشتیبانی نمی‌کند.");return}
+  const p=await Notification.requestPermission();
+  if(p==="granted"){log("اعلان‌های گوشی فعال شد.");$("notify").textContent="🔔 اعلان فعال است"}else log("اجازه اعلان داده نشد.");
+};
+render();
+</script>
+</body>
+</html>
