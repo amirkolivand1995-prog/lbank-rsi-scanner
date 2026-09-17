@@ -37,6 +37,54 @@ jobs:
         run: |
           python -m pip install --disable-pip-version-check requests
 
+      - name: Test Telegram
+        env:
+          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+
+        run: |
+          python - <<'PY'
+          import os
+          import requests
+
+          token = os.environ["TELEGRAM_BOT_TOKEN"]
+
+          url = f"https://api.telegram.org/bot{token}/getMe"
+
+          response = requests.get(
+              url,
+              timeout=20
+          )
+
+          print("Telegram HTTP STATUS:", response.status_code)
+
+          response.raise_for_status()
+
+          data = response.json()
+
+          if not data.get("ok"):
+              raise RuntimeError("Telegram bot test failed.")
+
+          print("Telegram connection: OK")
+          PY
+
+      - name: Test Binance Futures
+        run: |
+          python - <<'PY'
+          import requests
+
+          url = "https://fapi.binance.com/fapi/v1/exchangeInfo"
+
+          response = requests.get(
+              url,
+              timeout=20
+          )
+
+          print("Binance HTTP STATUS:", response.status_code)
+          print("Binance RESPONSE:")
+          print(response.text[:2000])
+          PY
+
       - name: Run RSI scanner
         env:
           TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
