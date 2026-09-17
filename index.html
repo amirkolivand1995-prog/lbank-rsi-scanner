@@ -1,40 +1,201 @@
 <!doctype html>
 <html lang="fa" dir="rtl">
 <head>
-<meta charset="utf-8">
+<meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <meta name="theme-color" content="#0b1224">
 <title>LBank RSI Alert</title>
 <style>
-*{box-sizing:border-box}body{margin:0;background:#0b1224;color:#eef3ff;font-family:Tahoma,Arial,sans-serif}
-.wrap{max-width:760px;margin:auto;padding:12px}.card{background:#111b31;border:1px solid #263657;border-radius:20px;padding:16px;margin-bottom:14px}
-h1{font-size:23px;margin:0 0 8px}.sub{color:#adbad3;line-height:1.9}.status{font-size:18px;font-weight:bold;margin:12px 0}
+*{box-sizing:border-box}
+body{margin:0;background:#0b1224;color:#eef3ff;font-family:Tahoma,Arial,sans-serif}
+.wrap{max-width:760px;margin:auto;padding:12px}
+.card{background:#111b31;border:1px solid #263657;border-radius:20px;padding:16px;margin-bottom:14px}
+h1{font-size:23px;margin:0 0 8px}
+.sub{color:#adbad3;line-height:1.9}
+.status{font-size:18px;font-weight:bold;margin:12px 0}
 .dot{display:inline-block;width:11px;height:11px;border-radius:50%;background:#777;margin-left:7px}
 button{border:0;border-radius:13px;padding:13px 17px;font-size:16px;font-weight:bold;margin:4px;cursor:pointer}
 .start{background:#1769e8;color:#fff}.notify{background:#26385f;color:#fff}.stop{background:#5d2630;color:#fff}
-.grid{display:grid;grid-template-columns:1fr 1fr;gap:7px}.row{background:#0d1629;border-radius:11px;padding:10px;display:flex;justify-content:space-between}
-.rsi{color:#b9c6df}.good{color:#36d98b}.bad{color:#ff6d7d}.log{background:#08101f;border-radius:12px;padding:10px;max-height:220px;overflow:auto;font-size:12px;line-height:1.9}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:7px}
+.row{background:#0d1629;border-radius:11px;padding:10px;display:flex;justify-content:space-between}
+.rsi{color:#b9c6df}.good{color:#36d98b}.bad{color:#ff6d7d}
+.log{background:#08101f;border-radius:12px;padding:10px;max-height:220px;overflow:auto;font-size:12px;line-height:1.9}
 .alert{background:#1b2942;border-right:4px solid #3985ff;padding:9px;border-radius:9px;margin:6px 0}
 @media(max-width:520px){.grid{grid-template-columns:1fr}}
 </style>
 </head>
 <body>
 <div class="wrap">
+
 <div class="card">
-<h1>馃搳 賴卮丿丕乇 RSI 亘乇丕蹖 LBank Futures</h1>
-<div class="sub">RSI 20 鈥� 鬲丕蹖賲鈥屬佖臂屬� 15 丿賯蹖賯賴 鈥� 賴卮丿丕乇 賴賳诏丕賲 毓亘賵乇 丕夭 70 蹖丕 30 鈥� 亘丿賵賳 API Key</div>
-<div class="status"><span id="dot" class="dot"></span><span id="status">賲鬲賵賯賮 丕爻鬲</span></div>
-<button class="start" id="start">鈻� 卮乇賵毓 丕爻讴賳</button>
-<button class="notify" id="notify">馃敂 賮毓丕賱鈥屭┴必� 丕毓賱丕賳</button>
-<button class="stop" id="stop">鈴� 鬲賵賯賮</button>
+<h1>&#128202; &#1607;&#1588;&#1583;&#1575;&#1585; RSI &#1576;&#1585;&#1575;&#1740; LBank Futures</h1>
+<div class="sub">RSI 20 &#8226; &#1578;&#1575;&#1740;&#1605; &#1601;&#1585;&#1740;&#1605; 15 &#1583;&#1602;&#1740;&#1602;&#1607; &#8226; &#1607;&#1588;&#1583;&#1575;&#1585; &#1607;&#1606;&#1711;&#1575;&#1605; &#1593;&#1576;&#1608;&#1585; &#1575;&#1586; 70 &#1740;&#1575; 30 &#8226; &#1576;&#1583;&#1608;&#1606; API Key</div>
+<div class="status"><span id="dot" class="dot"></span><span id="status">&#1605;&#1578;&#1608;&#1602;&#1601; &#1575;&#1587;&#1578;</span></div>
+<button class="start" id="start">&#9654; &#1588;&#1585;&#1608;&#1593; &#1575;&#1587;&#1705;&#1606;</button>
+<button class="notify" id="notify">&#128276; &#1601;&#1593;&#1575;&#1604;&#8204;&#1705;&#1585;&#1583;&#1606; &#1575;&#1593;&#1604;&#1575;&#1606;</button>
+<button class="stop" id="stop">&#9209; &#1578;&#1608;&#1602;&#1601;</button>
 <div id="note" class="sub"></div>
 </div>
-<div class="card"><h2>賵囟毓蹖鬲 鄄鄹 賳賲丕丿</h2><div id="grid" class="grid"></div></div>
-<div class="card"><h2>馃敂 賴卮丿丕乇賴丕</h2><div id="alerts">賴賳賵夭 賴卮丿丕乇蹖 孬亘鬲 賳卮丿賴.</div></div>
-<div class="card"><h2>诏夭丕乇卮 丕鬲氐丕賱</h2><div id="log" class="log"></div></div>
+
+<div class="card">
+<h2>&#1608;&#1590;&#1593;&#1740;&#1578; 28 &#1606;&#1605;&#1575;&#1583;</h2>
+<div id="grid" class="grid"></div>
+</div>
+
+<div class="card">
+<h2>&#128276; &#1607;&#1588;&#1583;&#1575;&#1585;&#1607;&#1575;</h2>
+<div id="alerts">&#1607;&#1606;&#1608;&#1586; &#1607;&#1588;&#1583;&#1575;&#1585;&#1740; &#1579;&#1576;&#1578; &#1606;&#1588;&#1583;&#1607; &#1575;&#1587;&#1578;.</div>
+</div>
+
+<div class="card">
+<h2>&#1711;&#1586;&#1575;&#1585;&#1588; &#1575;&#1578;&#1589;&#1575;&#1604;</h2>
+<div id="log" class="log"></div>
+</div>
+
 </div>
 
 <script>
+const SYMBOLS=["XCUUSDT","XBRUSDT","GOLDUSDT","SILVERUSDT","BTCUSDT","ETHUSDT","FILUSDT","SOLUSDT","ICPUSDT","XRPUSDT","DOGEUSDT","SHIBUSDT","DYDXUSDT","HBARUSDT","NOTUSDT","APTUSDT","ENAUSDT","AEROUSDT","CHZUSDT","GALAUSDT","SNXUSDT","TRXUSDT","POPCATUSDT","PEPEUSDT","LINKUSDT","UNIUSDT","ADAUSDT","AVAXUSDT"];
+const N=20,UP=70,DOWN=30,TF="15min",URL="wss://lbkperpws.lbank.com/ws";
+const S={};let ws=null,running=false,timer=null;
+
+for(const s of SYMBOLS){
+ S[s]={bars:new Map(),current:null,last:null};
+ let d=document.createElement("div");d.className="row";
+ d.innerHTML='<b>'+s+'.P</b><span class="rsi" id="r-'+s+'">&#8212;</span>';
+ document.getElementById("grid").appendChild(d)
+}
+
+function log(x){
+ let d=document.createElement("div");
+ d.textContent=new Date().toLocaleTimeString("fa-IR")+" &#8212; "+x;
+ document.getElementById("log").prepend(d)
+}
+function status(x,on){
+ document.getElementById("status").innerHTML=x;
+ document.getElementById("dot").style.background=on?"#19c56b":"#ff5d6c"
+}
+function calc(a){
+ if(a.length<N+1)return null;
+ let g=0,l=0;
+ for(let i=1;i<=N;i++){let d=a[i]-a[i-1];if(d>=0)g+=d;else l-=d}
+ g/=N;l/=N;
+ for(let i=N+1;i<a.length;i++){
+  let d=a[i]-a[i-1],gg=d>0?d:0,ll=d<0?-d:0;
+  g=((N-1)*g+gg)/N;l=((N-1)*l+ll)/N
+ }
+ return l===0?100:100-100/(1+g/l)
+}
+function time(t){
+ if(typeof t==="number")return t<1e12?t*1000:t;
+ let n=Number(t);if(Number.isFinite(n))return n<1e12?n*1000:n;
+ return Date.parse(t)
+}
+function bar(x){
+ if(!x||typeof x!=="object")return null;
+ let k=x.kbar||x;
+ let t=time(k.t??k.time??k.timestamp),c=Number(k.c??k.close);
+ return Number.isFinite(t)&&Number.isFinite(c)?{t,c}:null
+}
+function findBars(x,out=[]){
+ if(!x)return out;
+ if(Array.isArray(x)){
+  if(x.length>=5){let t=time(x[0]),c=Number(x[4]);if(Number.isFinite(t)&&Number.isFinite(c))out.push({t,c})}
+  else x.forEach(v=>findBars(v,out));
+  return out
+ }
+ if(typeof x!=="object")return out;
+ if(x.kbar){
+  if(Array.isArray(x.kbar))x.kbar.forEach(v=>{let b=bar(v);if(b)out.push(b)});
+  else{let b=bar(x.kbar);if(b)out.push(b)}
+ }
+ if(x.data){
+  if(Array.isArray(x.data))x.data.forEach(v=>{let b=bar(v);if(b)out.push(b)});
+  else{let b=bar(x.data);if(b)out.push(b)}
+ }
+ return out
+}
+function show(s,v){
+ let e=document.getElementById("r-"+s);
+ e.textContent=v==null?"&#8212;":"RSI "+v.toFixed(2);
+ e.className="rsi "+(v>70?"bad":v<30?"good":"")
+}
+function alertRSI(s,up,v){
+ let text=up
+  ? "&#128680; "+s+".P &#8212; RSI 20 &#1576;&#1575;&#1604;&#1575;&#1740; 70 &#1585;&#1601;&#1578;: "+v.toFixed(2)
+  : "&#128680; "+s+".P &#8212; RSI 20 &#1586;&#1740;&#1585; 30 &#1585;&#1601;&#1578;: "+v.toFixed(2);
+ let temp=document.createElement("div");temp.innerHTML=text;text=temp.textContent;
+ let a=document.getElementById("alerts");
+ if(a.textContent.includes("&#1607;&#1606;&#1608;&#1586;"))a.innerHTML="";
+ let d=document.createElement("div");d.className="alert";d.textContent=text;a.prepend(d);
+ if("Notification"in window&&Notification.permission==="granted")
+  try{new Notification("LBank RSI Alert",{body:text,tag:s+(up?"U":"D")})}catch(e){}
+ try{navigator.vibrate&&navigator.vibrate([300,100,300])}catch(e){}
+ log(text)
+}
+function addHistory(s,bs){
+ let z=S[s];bs.sort((a,b)=>a.t-b.t).forEach(b=>z.bars.set(String(b.t),b.c));
+ let a=[...z.bars].map(([t,c])=>({t:+t,c})).sort((a,b)=>a.t-b.t);
+ while(a.length>160)z.bars.delete(String(a.shift().t));
+ if(a.length){z.current=a[a.length-1].t;let v=calc(a.map(x=>x.c));if(v!=null){z.last=v;show(s,v)}}
+}
+function live(s,b){
+ let z=S[s];
+ if(z.current==null){z.current=b.t;z.bars.set(String(b.t),b.c);return}
+ if(b.t===z.current){z.bars.set(String(b.t),b.c);return}
+ z.bars.set(String(b.t),b.c);
+ let a=[...z.bars].map(([t,c])=>({t:+t,c})).sort((a,b)=>a.t-b.t);
+ let closed=a.filter(x=>x.t<=z.current),v=calc(closed.map(x=>x.c));
+ if(v!=null&&z.last!=null){
+  if(z.last<=UP&&v>UP)alertRSI(s,true,v);
+  if(z.last>=DOWN&&v<DOWN)alertRSI(s,false,v);
+  z.last=v;show(s,v)
+ }
+ z.current=b.t;while(a.length>160)z.bars.delete(String(a.shift().t))
+}
+function pairs(s){return [s,s.toLowerCase(),s.replace("USDT","_USDT").toLowerCase(),s.replace("USDT","_USDT")]}
+function connect(){
+ if(!running)return;
+ try{ws&&ws.close()}catch(e){}
+ status("&#1583;&#1585; &#1581;&#1575;&#1604; &#1575;&#1578;&#1589;&#1575;&#1604;...",false);
+ ws=new WebSocket(URL);
+ ws.onopen=()=>{
+  status("&#128994; &#1605;&#1578;&#1589;&#1604; &#8212; &#1583;&#1585; &#1581;&#1575;&#1604; &#1583;&#1585;&#1740;&#1575;&#1601;&#1578; 15 &#1583;&#1602;&#1740;&#1602;&#1607;&#8204;&#1575;&#1740;",true);
+  log("WebSocket &#1605;&#1578;&#1589;&#1604; &#1588;&#1583;.");
+  for(const s of SYMBOLS)for(const p of pairs(s)){
+   ws.send(JSON.stringify({action:"request",request:"kbar",kbar:TF,pair:p,size:"120"}));
+   ws.send(JSON.stringify({action:"subscribe",subscribe:"kbar",kbar:TF,pair:p}))
+  }
+  log("&#1583;&#1585;&#1582;&#1608;&#1575;&#1587;&#1578; Kline &#1576;&#1585;&#1575;&#1740; 28 &#1606;&#1605;&#1575;&#1583; &#1575;&#1585;&#1587;&#1575;&#1604; &#1588;&#1583;.")
+ };
+ ws.onmessage=e=>{
+  if(typeof e.data!=="string")return;let m;try{m=JSON.parse(e.data)}catch(_){return}
+  if(m.ping){try{ws.send(JSON.stringify({pong:m.ping}))}catch(_){}return}
+  let p=String(m.pair||m.symbol||"").toUpperCase().replace(/_/g,"");
+  let s=SYMBOLS.find(x=>p.includes(x));if(!s)return;
+  let bs=findBars(m);if(!bs.length)return;bs.sort((a,b)=>a.t-b.t);
+  bs.length>1?addHistory(s,bs):live(s,bs[0])
+ };
+ ws.onerror=()=>log("&#1582;&#1591;&#1575; &#1583;&#1585; WebSocket.");
+ ws.onclose=()=>{
+  if(running){status("&#1575;&#1578;&#1589;&#1575;&#1604; &#1602;&#1591;&#1593; &#1588;&#1583; &#8212; &#1578;&#1604;&#1575;&#1588; &#1605;&#1580;&#1583;&#1583;...",false);log("&#1575;&#1578;&#1589;&#1575;&#1604; &#1602;&#1591;&#1593; &#1588;&#1583;&#1567; &#1662;&#1606;&#1580; &#1579;&#1575;&#1606;&#1740;&#1607; &#1583;&#1740;&#1711;&#1585; &#1578;&#1604;&#1575;&#1588; &#1605;&#1740;&#8204;&#1588;&#1608;&#1583;.");timer=setTimeout(connect,5000)}
+ }
+}
+document.getElementById("start").onclick=()=>{
+ if(!running){running=true;document.getElementById("note").innerHTML="&#1576;&#1585;&#1575;&#1740; &#1607;&#1588;&#1583;&#1575;&#1585; &#1601;&#1608;&#1585;&#1740;&#1548; &#1589;&#1601;&#1581;&#1607; &#1585;&#1575; &#1576;&#1575;&#1586; &#1606;&#1711;&#1607; &#1583;&#1575;&#1585;&#1740;&#1583; &#1608; &#1575;&#1593;&#1604;&#1575;&#1606;&#8204;&#1607;&#1575; &#1585;&#1575; &#1601;&#1593;&#1575;&#1604; &#1705;&#1606;&#1740;&#1583;.";connect()}
+};
+document.getElementById("stop").onclick=()=>{
+ running=false;clearTimeout(timer);try{ws&&ws.close()}catch(e){}ws=null;status("&#1605;&#1578;&#1608;&#1602;&#1601; &#1575;&#1587;&#1578;",false);log("&#1575;&#1587;&#1705;&#1606; &#1605;&#1578;&#1608;&#1602;&#1601; &#1588;&#1583;.")
+};
+document.getElementById("notify").onclick=async()=>{
+ if(!("Notification"in window)){alert("&#1605;&#1581;&#1581;&#1608;&#1585;&#1711;&#1585; &#1575;&#1740;&#1606; &#1711;&#1608;&#1588;&#1740; &#1575;&#1582;&#1578;&#1575;&#1585; &#1608;&#1576; &#1585;&#1575; &#1662;&#1588;&#1578;&#1740;&#1576;&#1575;&#1606;&#1740; &#1606;&#1605;&#1740;&#8204;&#1705;&#1606;&#1583;.");return}
+ let p=await Notification.requestPermission();
+ document.getElementById("note").innerHTML=p==="granted"?"&#9989; &#1575;&#1593;&#1604;&#1575;&#1606; &#1711;&#1608;&#1588;&#1740; &#1601;&#1593;&#1575;&#1604; &#1588;&#1583;.":"&#9888;&#65039; &#1575;&#1580;&#1575;&#1586;&#1607; &#1575;&#1593;&#1604;&#1575;&#1606; &#1583;&#1575;&#1583;&#1607; &#1606;&#1588;&#1583;.";
+};
+status("&#1605;&#1578;&#1608;&#1602;&#1601; &#1575;&#1587;&#1578;",false);log("&#1589;&#1601;&#1581;&#1607; &#1570;&#1605;&#1575;&#1583;&#1607; &#1575;&#1587;&#1578;.");
+</script>
+</body>
+</html><script>
 const SYMBOLS=["XCUUSDT","XBRUSDT","GOLDUSDT","SILVERUSDT","BTCUSDT","ETHUSDT","FILUSDT","SOLUSDT","ICPUSDT","XRPUSDT","DOGEUSDT","SHIBUSDT","DYDXUSDT","HBARUSDT","NOTUSDT","APTUSDT","ENAUSDT","AEROUSDT","CHZUSDT","GALAUSDT","SNXUSDT","TRXUSDT","POPCATUSDT","PEPEUSDT","LINKUSDT","UNIUSDT","ADAUSDT","AVAXUSDT"];
 const N=20,UP=70,DOWN=30,TF="15min",URL="wss://lbkperpws.lbank.com/ws";
 const S={};let ws=null,running=false,timer=null;
