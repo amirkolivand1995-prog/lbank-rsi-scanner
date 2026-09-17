@@ -1,372 +1,649 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="fa" dir="rtl">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
-<meta name="theme-color" content="#0b1224">
-<title>LBank RSI Alert</title>
-<style>
-*{box-sizing:border-box}
-body{margin:0;background:#0b1224;color:#eef3ff;font-family:Tahoma,Arial,sans-serif}
-.wrap{max-width:760px;margin:auto;padding:12px}
-.card{background:#111b31;border:1px solid #263657;border-radius:20px;padding:16px;margin-bottom:14px}
-h1{font-size:23px;margin:0 0 8px}
-.sub{color:#adbad3;line-height:1.9}
-.status{font-size:18px;font-weight:bold;margin:12px 0}
-.dot{display:inline-block;width:11px;height:11px;border-radius:50%;background:#777;margin-left:7px}
-button{border:0;border-radius:13px;padding:13px 17px;font-size:16px;font-weight:bold;margin:4px;cursor:pointer}
-.start{background:#1769e8;color:#fff}.notify{background:#26385f;color:#fff}.stop{background:#5d2630;color:#fff}
-.grid{display:grid;grid-template-columns:1fr 1fr;gap:7px}
-.row{background:#0d1629;border-radius:11px;padding:10px;display:flex;justify-content:space-between}
-.rsi{color:#b9c6df}.good{color:#36d98b}.bad{color:#ff6d7d}
-.log{background:#08101f;border-radius:12px;padding:10px;max-height:220px;overflow:auto;font-size:12px;line-height:1.9}
-.alert{background:#1b2942;border-right:4px solid #3985ff;padding:9px;border-radius:9px;margin:6px 0}
-@media(max-width:520px){.grid{grid-template-columns:1fr}}
-</style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <title>Binance RSI Scanner</title>
+
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #111827;
+      color: #fff;
+      margin: 0;
+      padding: 20px;
+    }
+
+    .container {
+      max-width: 1000px;
+      margin: auto;
+    }
+
+    h1 {
+      text-align: center;
+    }
+
+    .subtitle {
+      text-align: center;
+      color: #aaa;
+      margin-bottom: 20px;
+    }
+
+    .buttons {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      justify-content: center;
+      margin-bottom: 20px;
+    }
+
+    button {
+      border: none;
+      border-radius: 8px;
+      padding: 12px 18px;
+      font-size: 15px;
+      cursor: pointer;
+    }
+
+    #startBtn {
+      background: #16a34a;
+      color: white;
+    }
+
+    #notifyBtn {
+      background: #2563eb;
+      color: white;
+    }
+
+    #stopBtn {
+      background: #dc2626;
+      color: white;
+    }
+
+    .status {
+      background: #1f2937;
+      padding: 15px;
+      border-radius: 10px;
+      margin-bottom: 20px;
+      line-height: 1.8;
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+      gap: 10px;
+    }
+
+    .coin {
+      background: #1f2937;
+      padding: 15px;
+      border-radius: 10px;
+      text-align: center;
+    }
+
+    .symbol {
+      font-weight: bold;
+      font-size: 16px;
+    }
+
+    .rsi {
+      font-size: 28px;
+      margin-top: 8px;
+    }
+
+    .normal {
+      color: white;
+    }
+
+    .high {
+      color: #22c55e;
+    }
+
+    .low {
+      color: #ef4444;
+    }
+
+    .alerts {
+      margin-top: 20px;
+      background: #1f2937;
+      border-radius: 10px;
+      padding: 15px;
+    }
+
+    .alert {
+      padding: 10px;
+      border-bottom: 1px solid #374151;
+    }
+
+    .log {
+      margin-top: 20px;
+      background: #0b1220;
+      border-radius: 10px;
+      padding: 15px;
+      font-size: 13px;
+      white-space: pre-wrap;
+      max-height: 250px;
+      overflow-y: auto;
+    }
+  </style>
 </head>
+
 <body>
-<div class="wrap">
 
-<div class="card">
-<h1>&#128202; &#1607;&#1588;&#1583;&#1575;&#1585; RSI &#1576;&#1585;&#1575;&#1740; LBank Futures</h1>
-<div class="sub">RSI 20 &#8226; &#1578;&#1575;&#1740;&#1605; &#1601;&#1585;&#1740;&#1605; 15 &#1583;&#1602;&#1740;&#1602;&#1607; &#8226; &#1607;&#1588;&#1583;&#1575;&#1585; &#1607;&#1606;&#1711;&#1575;&#1605; &#1593;&#1576;&#1608;&#1585; &#1575;&#1586; 70 &#1740;&#1575; 30 &#8226; &#1576;&#1583;&#1608;&#1606; API Key</div>
-<div class="status"><span id="dot" class="dot"></span><span id="status">&#1605;&#1578;&#1608;&#1602;&#1601; &#1575;&#1587;&#1578;</span></div>
-<button class="start" id="start">&#9654; &#1588;&#1585;&#1608;&#1593; &#1575;&#1587;&#1705;&#1606;</button>
-<button class="notify" id="notify">&#128276; &#1601;&#1593;&#1575;&#1604;&#8204;&#1705;&#1585;&#1583;&#1606; &#1575;&#1593;&#1604;&#1575;&#1606;</button>
-<button class="stop" id="stop">&#9209; &#1578;&#1608;&#1602;&#1601;</button>
-<div id="note" class="sub"></div>
-</div>
+<div class="container">
 
-<div class="card">
-<h2>&#1608;&#1590;&#1593;&#1740;&#1578; 28 &#1606;&#1605;&#1575;&#1583;</h2>
-<div id="grid" class="grid"></div>
-</div>
+  <h1>📊 هشدار RSI برای Binance Futures</h1>
 
-<div class="card">
-<h2>&#128276; &#1607;&#1588;&#1583;&#1575;&#1585;&#1607;&#1575;</h2>
-<div id="alerts">&#1607;&#1606;&#1608;&#1586; &#1607;&#1588;&#1583;&#1575;&#1585;&#1740; &#1579;&#1576;&#1578; &#1606;&#1588;&#1583;&#1607; &#1575;&#1587;&#1578;.</div>
-</div>
-
-<div class="card">
-<h2>&#1711;&#1586;&#1575;&#1585;&#1588; &#1575;&#1578;&#1589;&#1575;&#1604;</h2>
-<div id="log" class="log"></div>
-</div>
-
-</div>
-
-<script>
-const SYMBOLS=["XCUUSDT","XBRUSDT","GOLDUSDT","SILVERUSDT","BTCUSDT","ETHUSDT","FILUSDT","SOLUSDT","ICPUSDT","XRPUSDT","DOGEUSDT","SHIBUSDT","DYDXUSDT","HBARUSDT","NOTUSDT","APTUSDT","ENAUSDT","AEROUSDT","CHZUSDT","GALAUSDT","SNXUSDT","TRXUSDT","POPCATUSDT","PEPEUSDT","LINKUSDT","UNIUSDT","ADAUSDT","AVAXUSDT"];
-const N=20,UP=70,DOWN=30,TF="15min",URL="wss://lbkperpws.lbank.com/ws";
-const S={};let ws=null,running=false,timer=null;
-
-for(const s of SYMBOLS){
- S[s]={bars:new Map(),current:null,last:null};
- let d=document.createElement("div");d.className="row";
- d.innerHTML='<b>'+s+'.P</b><span class="rsi" id="r-'+s+'">&#8212;</span>';
- document.getElementById("grid").appendChild(d)
-}
-
-function log(x){
- let d=document.createElement("div");
- d.textContent=new Date().toLocaleTimeString("fa-IR")+" &#8212; "+x;
- document.getElementById("log").prepend(d)
-}
-function status(x,on){
- document.getElementById("status").innerHTML=x;
- document.getElementById("dot").style.background=on?"#19c56b":"#ff5d6c"
-}
-function calc(a){
- if(a.length<N+1)return null;
- let g=0,l=0;
- for(let i=1;i<=N;i++){let d=a[i]-a[i-1];if(d>=0)g+=d;else l-=d}
- g/=N;l/=N;
- for(let i=N+1;i<a.length;i++){
-  let d=a[i]-a[i-1],gg=d>0?d:0,ll=d<0?-d:0;
-  g=((N-1)*g+gg)/N;l=((N-1)*l+ll)/N
- }
- return l===0?100:100-100/(1+g/l)
-}
-function time(t){
- if(typeof t==="number")return t<1e12?t*1000:t;
- let n=Number(t);if(Number.isFinite(n))return n<1e12?n*1000:n;
- return Date.parse(t)
-}
-function bar(x){
- if(!x||typeof x!=="object")return null;
- let k=x.kbar||x;
- let t=time(k.t??k.time??k.timestamp),c=Number(k.c??k.close);
- return Number.isFinite(t)&&Number.isFinite(c)?{t,c}:null
-}
-function findBars(x,out=[]){
- if(!x)return out;
- if(Array.isArray(x)){
-  if(x.length>=5){let t=time(x[0]),c=Number(x[4]);if(Number.isFinite(t)&&Number.isFinite(c))out.push({t,c})}
-  else x.forEach(v=>findBars(v,out));
-  return out
- }
- if(typeof x!=="object")return out;
- if(x.kbar){
-  if(Array.isArray(x.kbar))x.kbar.forEach(v=>{let b=bar(v);if(b)out.push(b)});
-  else{let b=bar(x.kbar);if(b)out.push(b)}
- }
- if(x.data){
-  if(Array.isArray(x.data))x.data.forEach(v=>{let b=bar(v);if(b)out.push(b)});
-  else{let b=bar(x.data);if(b)out.push(b)}
- }
- return out
-}
-function show(s,v){
- let e=document.getElementById("r-"+s);
- e.textContent=v==null?"&#8212;":"RSI "+v.toFixed(2);
- e.className="rsi "+(v>70?"bad":v<30?"good":"")
-}
-function alertRSI(s,up,v){
- let text=up
-  ? "&#128680; "+s+".P &#8212; RSI 20 &#1576;&#1575;&#1604;&#1575;&#1740; 70 &#1585;&#1601;&#1578;: "+v.toFixed(2)
-  : "&#128680; "+s+".P &#8212; RSI 20 &#1586;&#1740;&#1585; 30 &#1585;&#1601;&#1578;: "+v.toFixed(2);
- let temp=document.createElement("div");temp.innerHTML=text;text=temp.textContent;
- let a=document.getElementById("alerts");
- if(a.textContent.includes("&#1607;&#1606;&#1608;&#1586;"))a.innerHTML="";
- let d=document.createElement("div");d.className="alert";d.textContent=text;a.prepend(d);
- if("Notification"in window&&Notification.permission==="granted")
-  try{new Notification("LBank RSI Alert",{body:text,tag:s+(up?"U":"D")})}catch(e){}
- try{navigator.vibrate&&navigator.vibrate([300,100,300])}catch(e){}
- log(text)
-}
-function addHistory(s,bs){
- let z=S[s];bs.sort((a,b)=>a.t-b.t).forEach(b=>z.bars.set(String(b.t),b.c));
- let a=[...z.bars].map(([t,c])=>({t:+t,c})).sort((a,b)=>a.t-b.t);
- while(a.length>160)z.bars.delete(String(a.shift().t));
- if(a.length){z.current=a[a.length-1].t;let v=calc(a.map(x=>x.c));if(v!=null){z.last=v;show(s,v)}}
-}
-function live(s,b){
- let z=S[s];
- if(z.current==null){z.current=b.t;z.bars.set(String(b.t),b.c);return}
- if(b.t===z.current){z.bars.set(String(b.t),b.c);return}
- z.bars.set(String(b.t),b.c);
- let a=[...z.bars].map(([t,c])=>({t:+t,c})).sort((a,b)=>a.t-b.t);
- let closed=a.filter(x=>x.t<=z.current),v=calc(closed.map(x=>x.c));
- if(v!=null&&z.last!=null){
-  if(z.last<=UP&&v>UP)alertRSI(s,true,v);
-  if(z.last>=DOWN&&v<DOWN)alertRSI(s,false,v);
-  z.last=v;show(s,v)
- }
- z.current=b.t;while(a.length>160)z.bars.delete(String(a.shift().t))
-}
-function pairs(s){return [s,s.toLowerCase(),s.replace("USDT","_USDT").toLowerCase(),s.replace("USDT","_USDT")]}
-function connect(){
- if(!running)return;
- try{ws&&ws.close()}catch(e){}
- status("&#1583;&#1585; &#1581;&#1575;&#1604; &#1575;&#1578;&#1589;&#1575;&#1604;...",false);
- ws=new WebSocket(URL);
- ws.onopen=()=>{
-  status("&#128994; &#1605;&#1578;&#1589;&#1604; &#8212; &#1583;&#1585; &#1581;&#1575;&#1604; &#1583;&#1585;&#1740;&#1575;&#1601;&#1578; 15 &#1583;&#1602;&#1740;&#1602;&#1607;&#8204;&#1575;&#1740;",true);
-  log("WebSocket &#1605;&#1578;&#1589;&#1604; &#1588;&#1583;.");
-  for(const s of SYMBOLS)for(const p of pairs(s)){
-   ws.send(JSON.stringify({action:"request",request:"kbar",kbar:TF,pair:p,size:"120"}));
-   ws.send(JSON.stringify({action:"subscribe",subscribe:"kbar",kbar:TF,pair:p}))
-  }
-  log("&#1583;&#1585;&#1582;&#1608;&#1575;&#1587;&#1578; Kline &#1576;&#1585;&#1575;&#1740; 28 &#1606;&#1605;&#1575;&#1583; &#1575;&#1585;&#1587;&#1575;&#1604; &#1588;&#1583;.")
- };
- ws.onmessage=e=>{
-  if(typeof e.data!=="string")return;let m;try{m=JSON.parse(e.data)}catch(_){return}
-  if(m.ping){try{ws.send(JSON.stringify({pong:m.ping}))}catch(_){}return}
-  let p=String(m.pair||m.symbol||"").toUpperCase().replace(/_/g,"");
-  let s=SYMBOLS.find(x=>p.includes(x));if(!s)return;
-  let bs=findBars(m);if(!bs.length)return;bs.sort((a,b)=>a.t-b.t);
-  bs.length>1?addHistory(s,bs):live(s,bs[0])
- };
- ws.onerror=()=>log("&#1582;&#1591;&#1575; &#1583;&#1585; WebSocket.");
- ws.onclose=()=>{
-  if(running){status("&#1575;&#1578;&#1589;&#1575;&#1604; &#1602;&#1591;&#1593; &#1588;&#1583; &#8212; &#1578;&#1604;&#1575;&#1588; &#1605;&#1580;&#1583;&#1583;...",false);log("&#1575;&#1578;&#1589;&#1575;&#1604; &#1602;&#1591;&#1593; &#1588;&#1583;&#1567; &#1662;&#1606;&#1580; &#1579;&#1575;&#1606;&#1740;&#1607; &#1583;&#1740;&#1711;&#1585; &#1578;&#1604;&#1575;&#1588; &#1605;&#1740;&#8204;&#1588;&#1608;&#1583;.");timer=setTimeout(connect,5000)}
- }
-}
-document.getElementById("start").onclick=()=>{
- if(!running){running=true;document.getElementById("note").innerHTML="&#1576;&#1585;&#1575;&#1740; &#1607;&#1588;&#1583;&#1575;&#1585; &#1601;&#1608;&#1585;&#1740;&#1548; &#1589;&#1601;&#1581;&#1607; &#1585;&#1575; &#1576;&#1575;&#1586; &#1606;&#1711;&#1607; &#1583;&#1575;&#1585;&#1740;&#1583; &#1608; &#1575;&#1593;&#1604;&#1575;&#1606;&#8204;&#1607;&#1575; &#1585;&#1575; &#1601;&#1593;&#1575;&#1604; &#1705;&#1606;&#1740;&#1583;.";connect()}
-};
-document.getElementById("stop").onclick=()=>{
- running=false;clearTimeout(timer);try{ws&&ws.close()}catch(e){}ws=null;status("&#1605;&#1578;&#1608;&#1602;&#1601; &#1575;&#1587;&#1578;",false);log("&#1575;&#1587;&#1705;&#1606; &#1605;&#1578;&#1608;&#1602;&#1601; &#1588;&#1583;.")
-};
-document.getElementById("notify").onclick=async()=>{
- if(!("Notification"in window)){alert("&#1605;&#1581;&#1581;&#1608;&#1585;&#1711;&#1585; &#1575;&#1740;&#1606; &#1711;&#1608;&#1588;&#1740; &#1575;&#1582;&#1578;&#1575;&#1585; &#1608;&#1576; &#1585;&#1575; &#1662;&#1588;&#1578;&#1740;&#1576;&#1575;&#1606;&#1740; &#1606;&#1605;&#1740;&#8204;&#1705;&#1606;&#1583;.");return}
- let p=await Notification.requestPermission();
- document.getElementById("note").innerHTML=p==="granted"?"&#9989; &#1575;&#1593;&#1604;&#1575;&#1606; &#1711;&#1608;&#1588;&#1740; &#1601;&#1593;&#1575;&#1604; &#1588;&#1583;.":"&#9888;&#65039; &#1575;&#1580;&#1575;&#1586;&#1607; &#1575;&#1593;&#1604;&#1575;&#1606; &#1583;&#1575;&#1583;&#1607; &#1606;&#1588;&#1583;.";
-};
-status("&#1605;&#1578;&#1608;&#1602;&#1601; &#1575;&#1587;&#1578;",false);log("&#1589;&#1601;&#1581;&#1607; &#1570;&#1605;&#1575;&#1583;&#1607; &#1575;&#1587;&#1578;.");
-</script>
-</body>
-</html><script>
-const SYMBOLS=["XCUUSDT","XBRUSDT","GOLDUSDT","SILVERUSDT","BTCUSDT","ETHUSDT","FILUSDT","SOLUSDT","ICPUSDT","XRPUSDT","DOGEUSDT","SHIBUSDT","DYDXUSDT","HBARUSDT","NOTUSDT","APTUSDT","ENAUSDT","AEROUSDT","CHZUSDT","GALAUSDT","SNXUSDT","TRXUSDT","POPCATUSDT","PEPEUSDT","LINKUSDT","UNIUSDT","ADAUSDT","AVAXUSDT"];
-const N=20,UP=70,DOWN=30,TF="15min",URL="wss://lbkperpws.lbank.com/ws";
-const S={};let ws=null,running=false,timer=null;
-
-for(const s of SYMBOLS){S[s]={bars:new Map(),current:null,last:null};let d=document.createElement("div");d.className="row";d.innerHTML='<b>'+s+'.P</b><span class="rsi" id="r-'+s+'">鈥�</span>';document.getElementById("grid").appendChild(d)}
-
-function log(x){let d=document.createElement("div");d.textContent=new Date().toLocaleTimeString("fa-IR")+" 鈥� "+x;document.getElementById("log").prepend(d)}
-function status(x,on){document.getElementById("status").textContent=x;document.getElementById("dot").style.background=on?"#19c56b":"#ff5d6c"}
-function calc(a){if(a.length<N+1)return null;let g=0,l=0;for(let i=1;i<=N;i++){let d=a[i]-a[i-1];if(d>=0)g+=d;else l-=d}g/=N;l/=N;for(let i=N+1;i<a.length;i++){let d=a[i]-a[i-1],gg=d>0?d:0,ll=d<0?-d:0;g=((N-1)*g+gg)/N;l=((N-1)*l+ll)/N}return l===0?100:100-100/(1+g/l)}
-function time(t){if(typeof t==="number")return t<1e12?t*1000:t;let n=Number(t);if(Number.isFinite(n))return n<1e12?n*1000:n;return Date.parse(t)}
-function bar(x){if(!x||typeof x!=="object")return null;let k=x.kbar||x;let t=time(k.t??k.time??k.timestamp),c=Number(k.c??k.close);return Number.isFinite(t)&&Number.isFinite(c)?{t,c}:null}
-
-function findBars(x,out=[]){
- if(!x)return out;
- if(Array.isArray(x)){if(x.length>=5){let t=time(x[0]),c=Number(x[4]);if(Number.isFinite(t)&&Number.isFinite(c))out.push({t,c})}else x.forEach(v=>findBars(v,out));return out}
- if(typeof x!=="object")return out;
- if(x.kbar){if(Array.isArray(x.kbar))x.kbar.forEach(v=>{let b=bar(v);if(b)out.push(b)});else{let b=bar(x.kbar);if(b)out.push(b)}}
- if(x.data){if(Array.isArray(x.data))x.data.forEach(v=>{let b=bar(v);if(b)out.push(b)});else{let b=bar(x.data);if(b)out.push(b)}}
- return out
-}
-function show(s,v){let e=document.getElementById("r-"+s);e.textContent=v==null?"鈥�":"RSI "+v.toFixed(2);e.className="rsi "+(v>70?"bad":v<30?"good":"")}
-
-function alertRSI(s,up,v){
- let text=up?"馃毃 "+s+".P 鈥� RSI 20 亘丕賱丕蹖 70 乇賮鬲: "+v.toFixed(2):"馃毃 "+s+".P 鈥� RSI 20 夭蹖乇 30 乇賮鬲: "+v.toFixed(2);
- let a=document.getElementById("alerts");if(a.textContent.includes("賴賳賵夭"))a.innerHTML="";
- let d=document.createElement("div");d.className="alert";d.textContent=text;a.prepend(d);
- if("Notification"in window&&Notification.permission==="granted")try{new Notification("LBank RSI Alert",{body:text,tag:s+(up?"U":"D")})}catch(e){}
- try{navigator.vibrate&&navigator.vibrate([300,100,300])}catch(e){}
- log(text)
-}
-
-function addHistory(s,bs){
- let z=S[s];bs.sort((a,b)=>a.t-b.t).forEach(b=>z.bars.set(String(b.t),b.c));
- let a=[...z.bars].map(([t,c])=>({t:+t,c})).sort((a,b)=>a.t-b.t);while(a.length>160)z.bars.delete(String(a.shift().t));
- if(a.length){z.current=a[a.length-1].t;let v=calc(a.map(x=>x.c));if(v!=null){z.last=v;show(s,v)}}
-}
-
-function live(s,b){
- let z=S[s];
- if(z.current==null){z.current=b.t;z.bars.set(String(b.t),b.c);return}
- if(b.t===z.current){z.bars.set(String(b.t),b.c);return}
- z.bars.set(String(b.t),b.c);
- let a=[...z.bars].map(([t,c])=>({t:+t,c})).sort((a,b)=>a.t-b.t);
- let closed=a.filter(x=>x.t<=z.current),v=calc(closed.map(x=>x.c));
- if(v!=null&&z.last!=null){if(z.last<=UP&&v>UP)alertRSI(s,true,v);if(z.last>=DOWN&&v<DOWN)alertRSI(s,false,v);z.last=v;show(s,v)}
- z.current=b.t;while(a.length>160)z.bars.delete(String(a.shift().t))
-}
-
-function pairs(s){return [s,s.toLowerCase(),s.replace("USDT","_USDT").toLowerCase(),s.replace("USDT","_USDT")]}
-
-function connect(){
- if(!running)return;try{ws&&ws.close()}catch(e){};status("丿乇 丨丕賱 丕鬲氐丕賱...",false);ws=new WebSocket(URL);
- ws.onopen=()=>{status("馃煝 賲鬲氐賱 鈥� 丿乇 丨丕賱 丿乇蹖丕賮鬲 郾鄣 丿賯蹖賯賴鈥屫й�",true);log("WebSocket 賲鬲氐賱 卮丿.");for(const s of SYMBOLS){for(const p of pairs(s)){ws.send(JSON.stringify({action:"request",request:"kbar",kbar:TF,pair:p,size:"120"}));ws.send(JSON.stringify({action:"subscribe",subscribe:"kbar",kbar:TF,pair:p}))}}log("丿乇禺賵丕爻鬲 Kline 亘乇丕蹖 鄄鄹 賳賲丕丿 丕乇爻丕賱 卮丿.")};
- ws.onmessage=e=>{if(typeof e.data!=="string")return;let m;try{m=JSON.parse(e.data)}catch(_){return}
-  if(m.ping){try{ws.send(JSON.stringify({pong:m.ping}))}catch(_){}return}
-  let p=String(m.pair||m.symbol||"").toUpperCase().replace(/_/g,"");let s=SYMBOLS.find(x=>p.includes(x));if(!s)return;
-  let bs=findBars(m);if(!bs.length)return;bs.sort((a,b)=>a.t-b.t);bs.length>1?addHistory(s,bs):live(s,bs[0])
- };
- ws.onerror=()=>log("禺胤丕 丿乇 WebSocket.");
- ws.onclose=()=>{if(running){status("丕鬲氐丕賱 賯胤毓 卮丿 鈥� 鬲賱丕卮 賲噩丿丿...",false);log("丕鬲氐丕賱 賯胤毓 卮丿貨 鄣 孬丕賳蹖賴 丿蹖诏乇 鬲賱丕卮 賲蹖鈥屫促堌�.");timer=setTimeout(connect,5000)}}
-}
-
-document.getElementById("start").onclick=()=>{if(!running){running=true;document.getElementById("note").textContent="亘乇丕蹖 賴卮丿丕乇 賮賵乇蹖貙 氐賮丨賴 乇丕 亘丕夭 賳诏賴 丿丕乇蹖丿 賵 丕毓賱丕賳鈥屬囏� 乇丕 賮毓丕賱 讴賳蹖丿.";connect()}}
-document.getElementById("stop").onclick=()=>{running=false;clearTimeout(timer);try{ws&&ws.close()}catch(e){};ws=null;status("賲鬲賵賯賮 丕爻鬲",false);log("丕爻讴賳 賲鬲賵賯賮 卮丿.")}
-document.getElementById("notify").onclick=async()=>{if(!("Notification"in window)){alert("賲乇賵乇诏乇 丕蹖賳 诏賵卮蹖 丕夭 丕毓賱丕賳 賵亘 倬卮鬲蹖亘丕賳蹖 賳賲蹖鈥屭┵嗀�.");return}let p=await Notification.requestPermission();document.getElementById("note").textContent=p==="granted"?"鉁� 丕毓賱丕賳 诏賵卮蹖 賮毓丕賱 卮丿.":"鈿狅笍 丕噩丕夭賴 丕毓賱丕賳 丿丕丿賴 賳卮丿."}
-status("賲鬲賵賯賮 丕爻鬲",false);log("氐賮丨賴 丌賲丕丿賴 丕爻鬲.");
-</script>
-</body>
-</html>    <b>گزارش اتصال</b>
-    <div id="log" class="log"></div>
+  <div class="subtitle">
+    RSI 20 • تایم‌فریم 15 دقیقه • هشدار هنگام عبور از 70 یا 30 • بدون API Key
   </div>
+
+  <div class="buttons">
+    <button id="startBtn">▶ شروع اسکن</button>
+    <button id="notifyBtn">🔔 فعال‌سازی اعلان</button>
+    <button id="stopBtn">⛔ توقف</button>
+  </div>
+
+  <div class="status">
+    <div>وضعیت: <span id="status">متوقف</span></div>
+    <div>تعداد ارزها: 28</div>
+    <div>تایم‌فریم: 15m</div>
+    <div>RSI Length: 20</div>
+    <div>هشدار بالا: RSI &gt; 70</div>
+    <div>هشدار پایین: RSI &lt; 30</div>
+  </div>
+
+  <div id="coins" class="grid"></div>
+
+  <div class="alerts">
+    <h3>🚨 هشدارها</h3>
+    <div id="alertsList">هنوز هشداری ثبت نشده.</div>
+  </div>
+
+  <div class="log" id="log"></div>
+
 </div>
+
 <script>
+
 const SYMBOLS = [
-"XCUUSDT","XBRUSDT","GOLDUSDT","SILVERUSDT","BTCUSDT","ETHUSDT","FILUSDT",
-"SOLUSDT","ICPUSDT","XRPUSDT","DOGEUSDT","SHIBUSDT","DYDXUSDT","HBARUSDT",
-"NOTUSDT","APTUSDT","ENAUSDT","AEROUSDT","CHZUSDT","GALAUSDT","SNXUSDT",
-"TRXUSDT","POPCATUSDT","PEPEUSDT","LINKUSDT","UNIUSDT","ADAUSDT","AVAXUSDT"
+  "COPPERUSDT",
+  "CLUSDT",
+  "XAUUSDT",
+  "XAGUSDT",
+  "BTCUSDT",
+  "ETHUSDT",
+  "FILUSDT",
+  "SOLUSDT",
+  "ICPUSDT",
+  "XRPUSDT",
+  "DOGEUSDT",
+  "SHIBUSDT",
+  "DYDXUSDT",
+  "HBARUSDT",
+  "NOTUSDT",
+  "APTUSDT",
+  "ENAUSDT",
+  "AEROUSDT",
+  "CHZUSDT",
+  "GALAUSDT",
+  "SNXUSDT",
+  "TRXUSDT",
+  "POPCATUSDT",
+  "PEPEUSDT",
+  "LINKUSDT",
+  "UNIUSDT",
+  "ADAUSDT",
+  "AVAXUSDT"
 ];
-const RSI_LEN=20, UP=70, DOWN=30, TF="15min";
-const state=Object.fromEntries(SYMBOLS.map(s=>[s,{rsi:null,prev:null,lastBar:null,history:[]}]));
-let ws=null, running=false, reconnectTimer=null;
-const $=id=>document.getElementById(id);
-function log(x){$("log").textContent=new Date().toLocaleTimeString()+"  "+x+"\n"+$("log").textContent.slice(0,5000)}
-function setStatus(t,on=false){$("status").textContent=t;$("dot").classList.toggle("on",on)}
-function render(){
-  $("grid").innerHTML=SYMBOLS.map(s=>{
-    const x=state[s], r=x.rsi;
-    let cls="normal",txt=r==null?"—":r.toFixed(2);
-    if(r!=null&&r>70) cls="hotup"; else if(r!=null&&r<30) cls="hotdn";
-    return `<div class="row"><span class="sym">${s}.P</span><span class="rsi ${cls}">${txt}</span></div>`;
-  }).join("");
+
+const RSI_LENGTH = 20;
+const UPPER = 70;
+const LOWER = 30;
+
+const REST_URL = "https://fapi.binance.com";
+const WS_URL =
+  "wss://fstream.binance.com/market/stream?streams=" +
+  SYMBOLS.map(s => s.toLowerCase() + "@kline_15m").join("/");
+
+let ws = null;
+let running = false;
+
+const previousRSI = {};
+const rsiValues = {};
+const lastAlert = {};
+
+const coinsContainer = document.getElementById("coins");
+const statusEl = document.getElementById("status");
+const alertsList = document.getElementById("alertsList");
+const logEl = document.getElementById("log");
+
+function log(message) {
+  const time = new Date().toLocaleTimeString("fa-IR");
+  logEl.textContent =
+    `[${time}] ${message}\n` + logEl.textContent;
 }
-function rsi(vals){
-  if(vals.length<RSI_LEN+1) return null;
-  let gains=0,losses=0;
-  for(let i=1;i<=RSI_LEN;i++){const d=vals[i]-vals[i-1];if(d>=0)gains+=d;else losses-=d}
-  let ag=gains/RSI_LEN, al=losses/RSI_LEN;
-  for(let i=RSI_LEN+1;i<vals.length;i++){
-    const d=vals[i]-vals[i-1],g=Math.max(d,0),l=Math.max(-d,0);
-    ag=(ag*(RSI_LEN-1)+g)/RSI_LEN; al=(al*(RSI_LEN-1)+l)/RSI_LEN;
+
+function createCoins() {
+
+  coinsContainer.innerHTML = "";
+
+  SYMBOLS.forEach(symbol => {
+
+    const div = document.createElement("div");
+
+    div.className = "coin";
+    div.id = "coin-" + symbol;
+
+    div.innerHTML = `
+      <div class="symbol">${symbol}</div>
+      <div class="rsi normal" id="rsi-${symbol}">—</div>
+    `;
+
+    coinsContainer.appendChild(div);
+  });
+}
+
+function calculateRSI(closes) {
+
+  if (closes.length < RSI_LENGTH + 1) {
+    return null;
   }
-  if(al===0) return 100;
-  return 100-(100/(1+ag/al));
-}
-function notifyUser(msg){
-  if("Notification" in window && Notification.permission==="granted") new Notification("LBank RSI Alert",{body:msg});
-}
-function processBar(symbol, bar, confirmed=true){
-  const x=state[symbol], close=Number(bar.c);
-  if(!Number.isFinite(close)) return;
-  const t=String(bar.t);
-  const oldBar=x.lastBar;
-  if(oldBar===t){ x.history[x.history.length-1]=close; }
-  else { x.lastBar=t; x.history.push(close); if(x.history.length>300)x.history.shift(); }
-  const old=x.rsi; const now=rsi(x.history); x.prev=old; x.rsi=now;
-  if(confirmed && old!=null && now!=null){
-    if(old<=70 && now>70){const m=`🔴 ${symbol}.P | RSI 20 = ${now.toFixed(2)} > 70`; notifyUser(m); log(m)}
-    if(old>=30 && now<30){const m=`🟢 ${symbol}.P | RSI 20 = ${now.toFixed(2)} < 30`; notifyUser(m); log(m)}
-  }
-  render();
-}
-function connect(){
-  if(ws){try{ws.close()}catch(e){}}
-  setStatus("در حال اتصال به LBank Futures...",false);
-  ws=new WebSocket("wss://lbkperpws.lbank.com/ws");
-  ws.onopen=()=>{
-    setStatus("متصل — در حال دریافت ۱۵ دقیقه‌ای",true);log("WebSocket متصل شد.");
-    // First request history so RSI 20 is available immediately.
-    SYMBOLS.forEach(s=>{
-      ws.send(JSON.stringify({action:"request",request:"kbar",kbar:"15min",pair:s,size:"100"}));
-    });
-    // Then subscribe to live 15m candles.
-    SYMBOLS.forEach(s=>{
-      ws.send(JSON.stringify({action:"subscribe",subscribe:"kbar",kbar:"15min",pair:s}));
-    });
-    log("تاریخچه ۱۵ دقیقه‌ای + اشتراک زنده برای ۲۸ نماد ارسال شد.");
-  };
-  ws.onmessage=e=>{
-    let d; try{d=JSON.parse(e.data)}catch{return}
-    if(d.action==="ping"){ws.send(JSON.stringify({action:"pong",pong:d.ping}));return}
-    if(d.type==="kbar" && d.pair && d.kbar){
-      const s=d.pair.toUpperCase(); if(state[s]) processBar(s,d.kbar,true);
+
+  let gain = 0;
+  let loss = 0;
+
+  for (let i = 1; i <= RSI_LENGTH; i++) {
+
+    const change = closes[i] - closes[i - 1];
+
+    if (change > 0) {
+      gain += change;
+    } else {
+      loss -= change;
     }
-    // Historical request responses can vary by LBank gateway version.
-    if((d.type==="kbar" || d.type==="kbars" || d.request==="kbar") && d.pair){
-      const s=d.pair.toUpperCase();
-      const arr = Array.isArray(d.data) ? d.data : (Array.isArray(d.kbars) ? d.kbars : null);
-      if(state[s] && arr && arr.length){
-        state[s].history=[];
-        state[s].lastBar=null;
-        for(const b of arr){
-          const bar = Array.isArray(b) ? {t:b[0],o:b[1],h:b[2],l:b[3],c:b[4],v:b[5]} : b;
-          processBar(s,bar,false);
-        }
+  }
+
+  gain /= RSI_LENGTH;
+  loss /= RSI_LENGTH;
+
+  for (let i = RSI_LENGTH + 1; i < closes.length; i++) {
+
+    const change = closes[i] - closes[i - 1];
+
+    const currentGain = change > 0 ? change : 0;
+    const currentLoss = change < 0 ? -change : 0;
+
+    gain =
+      ((RSI_LENGTH - 1) * gain + currentGain) /
+      RSI_LENGTH;
+
+    loss =
+      ((RSI_LENGTH - 1) * loss + currentLoss) /
+      RSI_LENGTH;
+  }
+
+  if (loss === 0) {
+    return 100;
+  }
+
+  const rs = gain / loss;
+
+  return 100 - (100 / (1 + rs));
+}
+
+async function loadInitialData(symbol) {
+
+  try {
+
+    const response = await fetch(
+      `${REST_URL}/fapi/v1/klines?symbol=${symbol}&interval=15m&limit=100`
+    );
+
+    const data = await response.json();
+
+    if (!Array.isArray(data)) {
+      log(`${symbol}: خطا در دریافت اطلاعات`);
+      return;
+    }
+
+    const now = Date.now();
+
+    const closed = data.filter(
+      candle => Number(candle[6]) <= now
+    );
+
+    const closes = closed.map(
+      candle => Number(candle[4])
+    );
+
+    if (closes.length < RSI_LENGTH + 2) {
+      return;
+    }
+
+    const rsi = calculateRSI(closes);
+
+    if (rsi !== null) {
+      rsiValues[symbol] = rsi;
+      updateRSI(symbol, rsi);
+    }
+
+  } catch (error) {
+
+    log(`${symbol}: خطای اینترنت`);
+
+  }
+}
+
+function updateRSI(symbol, value) {
+
+  const element =
+    document.getElementById("rsi-" + symbol);
+
+  if (!element) return;
+
+  element.textContent = value.toFixed(2);
+
+  element.className = "rsi";
+
+  if (value > UPPER) {
+    element.classList.add("high");
+  }
+  else if (value < LOWER) {
+    element.classList.add("low");
+  }
+  else {
+    element.classList.add("normal");
+  }
+}
+
+function sendAlert(symbol, direction, value) {
+
+  const key =
+    `${symbol}-${direction}-${Math.floor(Date.now() / 900000)}`;
+
+  if (lastAlert[symbol] === key) {
+    return;
+  }
+
+  lastAlert[symbol] = key;
+
+  let text = "";
+
+  if (direction === "UP") {
+
+    text =
+      `🚨 ${symbol}\nRSI 20 از 70 عبور کرد\nRSI: ${value.toFixed(2)}\nتایم‌فریم: 15m`;
+
+  } else {
+
+    text =
+      `🚨 ${symbol}\nRSI 20 از 30 پایین‌تر رفت\nRSI: ${value.toFixed(2)}\nتایم‌فریم: 15m`;
+
+  }
+
+  const div = document.createElement("div");
+
+  div.className = "alert";
+  div.textContent =
+    `${new Date().toLocaleTimeString("fa-IR")} — ${text}`;
+
+  if (
+    alertsList.textContent ===
+    "هنوز هشداری ثبت نشده."
+  ) {
+    alertsList.innerHTML = "";
+  }
+
+  alertsList.prepend(div);
+
+  log(text);
+
+  if (
+    "Notification" in window &&
+    Notification.permission === "granted"
+  ) {
+
+    new Notification(
+      "Binance RSI Alert",
+      {
+        body: text
       }
-    }
-  };
-  ws.onerror=()=>{setStatus("خطا در اتصال",false);log("خطای WebSocket")}
-  ws.onclose=()=>{if(running){setStatus("اتصال قطع شد؛ تلاش مجدد...",false);clearTimeout(reconnectTimer);reconnectTimer=setTimeout(connect,4000)}}
+    );
+  }
 }
-$("start").onclick=()=>{
-  running=!running;
-  if(running){$("start").textContent="⏸ توقف اسکن";connect()}else{if(ws)ws.close();setStatus("متوقف",false);$("start").textContent="▶ شروع اسکن"}
-};
-$("notify").onclick=async()=>{
-  if(!("Notification" in window)){alert("این مرورگر اعلان را پشتیبانی نمی‌کند.");return}
-  const p=await Notification.requestPermission();
-  if(p==="granted"){log("اعلان‌های گوشی فعال شد.");$("notify").textContent="🔔 اعلان فعال است"}else log("اجازه اعلان داده نشد.");
-};
-render();
+
+function handleClosedCandle(symbol, closes) {
+
+  if (closes.length < RSI_LENGTH + 2) {
+    return;
+  }
+
+  const previous =
+    calculateRSI(closes.slice(0, -1));
+
+  const current =
+    calculateRSI(closes);
+
+  if (
+    previous === null ||
+    current === null
+  ) {
+    return;
+  }
+
+  previousRSI[symbol] = previous;
+  rsiValues[symbol] = current;
+
+  updateRSI(symbol, current);
+
+  if (
+    previous <= UPPER &&
+    current > UPPER
+  ) {
+
+    sendAlert(
+      symbol,
+      "UP",
+      current
+    );
+
+  }
+
+  if (
+    previous >= LOWER &&
+    current < LOWER
+  ) {
+
+    sendAlert(
+      symbol,
+      "DOWN",
+      current
+    );
+
+  }
+}
+
+function connectWebSocket() {
+
+  if (ws) {
+    ws.close();
+  }
+
+  ws = new WebSocket(WS_URL);
+
+  ws.onopen = () => {
+
+    statusEl.textContent =
+      "متصل به Binance";
+
+    log("WebSocket متصل شد.");
+
+  };
+
+  ws.onclose = () => {
+
+    statusEl.textContent =
+      "اتصال قطع شد";
+
+    log("WebSocket قطع شد.");
+
+    if (running) {
+
+      setTimeout(
+        connectWebSocket,
+        5000
+      );
+
+    }
+
+  };
+
+  ws.onerror = () => {
+
+    log("خطا در WebSocket");
+
+  };
+
+  ws.onmessage = event => {
+
+    try {
+
+      const message =
+        JSON.parse(event.data);
+
+      const data =
+        message.data;
+
+      if (
+        !data ||
+        data.e !== "kline"
+      ) {
+        return;
+      }
+
+      const k =
+        data.k;
+
+      if (
+        !k ||
+        !k.x
+      ) {
+        return;
+      }
+
+      const symbol =
+        k.s;
+
+      loadInitialData(symbol);
+
+    } catch (error) {
+
+      log("خطا در پردازش WebSocket");
+
+    }
+
+  };
+}
+
+async function startScanner() {
+
+  if (running) {
+    return;
+  }
+
+  running = true;
+
+  statusEl.textContent =
+    "در حال دریافت اطلاعات...";
+
+  log("شروع اسکن Binance Futures");
+
+  for (const symbol of SYMBOLS) {
+
+    await loadInitialData(symbol);
+
+  }
+
+  connectWebSocket();
+
+}
+
+function stopScanner() {
+
+  running = false;
+
+  if (ws) {
+    ws.close();
+    ws = null;
+  }
+
+  statusEl.textContent =
+    "متوقف";
+
+  log("اسکن متوقف شد.");
+
+}
+
+async function enableNotifications() {
+
+  if (!("Notification" in window)) {
+
+    alert(
+      "مرورگر این دستگاه از Notification پشتیبانی نمی‌کند."
+    );
+
+    return;
+  }
+
+  const permission =
+    await Notification.requestPermission();
+
+  if (permission === "granted") {
+
+    alert(
+      "اعلان‌ها فعال شدند."
+    );
+
+    log(
+      "Notification فعال شد."
+    );
+
+  } else {
+
+    alert(
+      "اجازه اعلان داده نشد."
+    );
+
+  }
+
+}
+
+document
+  .getElementById("startBtn")
+  .addEventListener(
+    "click",
+    startScanner
+  );
+
+document
+  .getElementById("notifyBtn")
+  .addEventListener(
+    "click",
+    enableNotifications
+  );
+
+document
+  .getElementById("stopBtn")
+  .addEventListener(
+    "click",
+    stopScanner
+  );
+
+createCoins();
+
 </script>
+
 </body>
 </html>
